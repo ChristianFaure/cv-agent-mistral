@@ -1,11 +1,30 @@
 import streamlit as st
 from mistralai import Mistral
 import os
+from PIL import Image
+import requests
+from io import BytesIO
+
+# Télécharger et préparer le logo Mistral
+@st.cache_data
+def get_mistral_logo():
+    """Télécharge le logo Mistral pour l'utiliser comme favicon"""
+    try:
+        response = requests.get("https://cms.mistral.ai/assets/920e56ee-25c5-439d-bd31-fbdf5c92c87f")
+        img = Image.open(BytesIO(response.content))
+        # Redimensionner pour favicon (32x32)
+        img = img.resize((32, 32))
+        return img
+    except:
+        # Si échec, retourner None et on utilisera un emoji
+        return None
+
+mistral_logo = get_mistral_logo()
 
 # Configuration de la page
 st.set_page_config(
     page_title="CV Interactif - [Votre Nom]",
-    page_icon="https://cms.mistral.ai/assets/920e56ee-25c5-439d-bd31-fbdf5c92c87f",
+    page_icon=mistral_logo if mistral_logo else "Ⓜ️",
     layout="wide"
 )
 
