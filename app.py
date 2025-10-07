@@ -9,6 +9,58 @@ st.set_page_config(
     layout="wide"
 )
 
+# PROTECTION PAR MOT DE PASSE
+def check_password():
+    """Retourne True si l'utilisateur a entré le bon mot de passe."""
+    
+    def password_entered():
+        """Vérifie si le mot de passe entré est correct."""
+        if st.session_state["password"] == os.getenv("APP_PASSWORD", "mistral2025"):
+            st.session_state["password_correct"] = True
+            del st.session_state["password"]  # Ne pas garder le mot de passe en mémoire
+        else:
+            st.session_state["password_correct"] = False
+
+    if "password_correct" not in st.session_state:
+        # Première visite, afficher le formulaire de mot de passe
+        st.markdown("""
+        <div style="text-align: center; padding: 50px;">
+            <h1 style="color: #FF7000;">🔒 Accès Privé</h1>
+            <p>Cette page est protégée. Veuillez entrer le mot de passe.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        st.text_input(
+            "Mot de passe", 
+            type="password", 
+            on_change=password_entered, 
+            key="password"
+        )
+        st.info("💡 Conseil : Le mot de passe vous a été communiqué par email")
+        return False
+    elif not st.session_state["password_correct"]:
+        # Mot de passe incorrect
+        st.markdown("""
+        <div style="text-align: center; padding: 50px;">
+            <h1 style="color: #FF7000;">🔒 Accès Privé</h1>
+            <p>Cette page est protégée. Veuillez entrer le mot de passe.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        st.text_input(
+            "Mot de passe", 
+            type="password", 
+            on_change=password_entered, 
+            key="password"
+        )
+        st.error("❌ Mot de passe incorrect")
+        return False
+    else:
+        # Mot de passe correct
+        return True
+
+# Vérifier le mot de passe avant d'afficher l'app
+if not check_password():
+    st.stop()
+
 # Initialisation du client Mistral
 @st.cache_resource
 def get_mistral_client():
