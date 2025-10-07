@@ -5,7 +5,7 @@ import os
 # Configuration de la page
 st.set_page_config(
     page_title="CV Interactif - [Votre Nom]",
-    page_icon="🤖",
+    page_icon="https://cms.mistral.ai/assets/920e56ee-25c5-439d-bd31-fbdf5c92c87f",
     layout="wide"
 )
 
