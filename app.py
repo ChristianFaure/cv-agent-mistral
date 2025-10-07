@@ -1,6 +1,5 @@
 import streamlit as st
-from mistralai.client import MistralClient
-from mistralai.models.chat_completion import ChatMessage
+from mistralai import Mistral
 import os
 
 # Configuration de la page
@@ -13,8 +12,11 @@ st.set_page_config(
 # Initialisation du client Mistral
 @st.cache_resource
 def get_mistral_client():
-    api_key = os.getenv("MISTRAL_API_KEY")  # À définir dans secrets
-    return MistralClient(api_key=api_key)
+    api_key = os.getenv("MISTRAL_API_KEY")
+    if not api_key:
+        st.error("⚠️ MISTRAL_API_KEY non trouvée. Vérifiez vos secrets Streamlit.")
+        st.stop()
+    return Mistral(api_key=api_key)
 
 client = get_mistral_client()
 
@@ -146,22 +148,22 @@ Instructions :
 - Si la question porte sur la motivation pour Mistral AI, explique clairement la proposition de valeur unique
 """
         
-        # Préparer les messages pour l'API
+        # Préparer les messages pour l'API (nouveau format)
         api_messages = [
-            ChatMessage(role="system", content=system_prompt)
+            {"role": "system", "content": system_prompt}
         ]
         
         # Ajouter l'historique (garder les 6 derniers messages pour le contexte)
         for msg in st.session_state.messages[-6:]:
-            api_messages.append(ChatMessage(
-                role=msg["role"],
-                content=msg["content"]
-            ))
+            api_messages.append({
+                "role": msg["role"],
+                "content": msg["content"]
+            })
         
-        # Appel à l'API Mistral
+        # Appel à l'API Mistral (nouvelle syntaxe)
         try:
             with st.spinner("🤔 Réflexion en cours..."):
-                response = client.chat(
+                response = client.chat.complete(
                     model="mistral-large-latest",
                     messages=api_messages,
                     temperature=0.7,
